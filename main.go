@@ -37,8 +37,11 @@ func main() {
 		fmt.Println("Enter number of tickets: ")
 		fmt.Scan(&userTickets)
 
-		// Check wheter user tickets is greater than the remaining tickets
-		if userTickets < remainingTickets {
+		isValidName := len(firstName) >= 2 && len(lastName) >= 2
+		isValidEmail := strings.Contains(email, "@")
+		isValidTicketNumber := userTickets > 0 && userTickets <= remainingTickets
+
+		if isValidName && isValidEmail && isValidTicketNumber {
 
 			remainingTickets = remainingTickets - userTickets
 			bookings = append(bookings, firstName+" "+lastName) // Working with slices
@@ -68,9 +71,15 @@ func main() {
 
 		} else {
 
-			fmt.Printf("We only have %v tickets remaining, so you can't book %v tickets\n", remainingTickets, userTickets)
-			//break // Skip execution of the rest of the code and stop the loop
-			//continue // Continue to the next iteration
+			if !isValidName {
+				fmt.Println("first name or last name you entered is too short")
+			}
+			if !isValidEmail {
+				fmt.Println("email address you entered doesn't contain @ sign")
+			}
+			if !isValidTicketNumber {
+				fmt.Println("number of tickets you entered is invalid")
+			}
 
 		}
 
