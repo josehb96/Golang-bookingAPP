@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"strings"
+	"strconv"
 )
 
 var conferenceName = "Go Conference"
@@ -10,7 +10,7 @@ var conferenceName = "Go Conference"
 const conferenceTickets int = 50
 
 var remainingTickets uint = 50
-var bookings []string
+var bookings = make([]map[string]string, 0) // Creating a list of maps where the initial size is 0, but later we can extend its size
 
 func main() {
 
@@ -69,8 +69,7 @@ func getFirstNames() []string {
 
 	for _, booking := range bookings {
 
-		var names = strings.Fields(booking)
-		firstNames = append(firstNames, names[0])
+		firstNames = append(firstNames, booking["firstName"])
 
 	}
 
@@ -104,7 +103,17 @@ func getUserInput() (string, string, string, uint) {
 func bookTicket(userTickets uint, firstName, lastName, email string) {
 
 	remainingTickets = remainingTickets - userTickets
-	bookings = append(bookings, firstName+" "+lastName) // Working with slices
+
+	// create a map for a user
+
+	var userData = make(map[string]string)
+	userData["firstName"] = firstName
+	userData["lastName"] = lastName
+	userData["email"] = email
+	userData["numberOfTickets"] = strconv.FormatUint(uint64(userTickets), 10) // Base 10 to represent decimal numbers / This give our userTickets in string format
+
+	bookings = append(bookings, userData) // Now we have a bookings list that contains all user information as key-value pairs
+	fmt.Printf("List of bookings is %v\n", bookings)
 
 	fmt.Printf("Thank your %v %v for booking %v tickets. You will receive a confirmation email at %v\n", firstName, lastName, userTickets, email)
 	fmt.Printf("%v tickets remaining for %v\n", remainingTickets, conferenceName)
