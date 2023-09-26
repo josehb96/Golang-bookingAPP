@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"sync"
+	"time"
 )
 
 var conferenceName = "Go Conference"
@@ -18,46 +20,50 @@ type UserData struct {
 	numberOfTickets uint
 }
 
+var wg = sync.WaitGroup{}
+
 func main() {
 
 	greetUsers()
 
-	for {
+	firstName, lastName, email, userTickets := getUserInput()
+	isValidName, isValidEmail, isValidTicketNumber := validateUserInput(firstName, lastName, email, userTickets, remainingTickets)
 
-		firstName, lastName, email, userTickets := getUserInput()
-		isValidName, isValidEmail, isValidTicketNumber := validateUserInput(firstName, lastName, email, userTickets, remainingTickets)
+	if isValidName && isValidEmail && isValidTicketNumber {
 
-		if isValidName && isValidEmail && isValidTicketNumber {
+		bookTicket(userTickets, firstName, lastName, email)
 
-			bookTicket(userTickets, firstName, lastName, email)
+		wg.Add(1) // This function adds a number of threads that the main thread should wait for and should be executed before creating a new thread
+		go sendTicket(userTickets, firstName, lastName, email)
+		// For example, if we have another go call then we have to put wg.Add(2)
 
-			firstNames := getFirstNames()
-			fmt.Printf("The first names of bookings are: %v\n", firstNames)
+		firstNames := getFirstNames()
+		fmt.Printf("The first names of bookings are: %v\n", firstNames)
 
-			if remainingTickets == 0 {
+		if remainingTickets == 0 {
 
-				// end program
+			// end program
 
-				fmt.Println("Our conference is booked out. Come back next year.")
-				break // End the loop
-
-			}
-
-		} else {
-
-			if !isValidName {
-				fmt.Println("first name or last name you entered is too short")
-			}
-			if !isValidEmail {
-				fmt.Println("email address you entered doesn't contain @ sign")
-			}
-			if !isValidTicketNumber {
-				fmt.Println("number of tickets you entered is invalid")
-			}
+			fmt.Println("Our conference is booked out. Come back next year.")
+			//break // End the loop
 
 		}
 
+	} else {
+
+		if !isValidName {
+			fmt.Println("first name or last name you entered is too short")
+		}
+		if !isValidEmail {
+			fmt.Println("email address you entered doesn't contain @ sign")
+		}
+		if !isValidTicketNumber {
+			fmt.Println("number of tickets you entered is invalid")
+		}
+
 	}
+
+	wg.Wait() // Waits for all the threads that were added right here to be done doing its job before the application can exit
 
 }
 
@@ -125,4 +131,14 @@ func bookTicket(userTickets uint, firstName, lastName, email string) {
 	fmt.Printf("Thank your %v %v for booking %v tickets. You will receive a confirmation email at %v\n", firstName, lastName, userTickets, email)
 	fmt.Printf("%v tickets remaining for %v\n", remainingTickets, conferenceName)
 
+}
+
+func sendTicket(userTickets uint, firstName, lastName, email string) {
+
+	time.Sleep(10 * time.Second)
+	var ticket = fmt.Sprintf("%v tickets for %v %v", userTickets, firstName, lastName) // Instead of print it out, you can save it into a string variable
+	fmt.Println("###################")
+	fmt.Printf("Sending ticket:\n %v \nto email address %v\n", ticket, email)
+	fmt.Println("###################")
+	wg.Done() // Removes the thread that we added before from the waiting list
 }
