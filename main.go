@@ -20,7 +20,7 @@ type UserData struct {
 	numberOfTickets uint
 }
 
-var wg = sync.WaitGroup{}
+var wg = sync.WaitGroup{} // Define WaitGroup to package level
 
 func main() {
 
@@ -33,9 +33,8 @@ func main() {
 
 		bookTicket(userTickets, firstName, lastName, email)
 
-		wg.Add(1) // This function adds a number of threads that the main thread should wait for and should be executed before creating a new thread
-		go sendTicket(userTickets, firstName, lastName, email)
-		// For example, if we have another go call then we have to put wg.Add(2)
+		wg.Add(1) // Increments WaitGroup counter by 1
+		go sendTicket(userTickets, firstName, lastName, email) // Start a new goroutine
 
 		firstNames := getFirstNames()
 		fmt.Printf("The first names of bookings are: %v\n", firstNames)
@@ -63,7 +62,7 @@ func main() {
 
 	}
 
-	wg.Wait() // Waits for all the threads that were added right here to be done doing its job before the application can exit
+	wg.Wait() // Waits for all the threads that were added right here to be done doing its job before the application can exit. Or simply wait until all goroutines are finished. 
 
 }
 
@@ -140,5 +139,5 @@ func sendTicket(userTickets uint, firstName, lastName, email string) {
 	fmt.Println("###################")
 	fmt.Printf("Sending ticket:\n %v \nto email address %v\n", ticket, email)
 	fmt.Println("###################")
-	wg.Done() // Removes the thread that we added before from the waiting list
+	wg.Done() // Removes the thread that we added before from the waiting list. Marks this goroutine as completed.
 }
